@@ -1606,8 +1606,12 @@ def task_log_view(request, task_id):
 
     result = AsyncResult(task_id)
     start = int(request.GET.get('start', 0))
+    log_dir = os.path.realpath(settings.TASK_LOG_DIR)
+    log_path = os.path.realpath(os.path.join(log_dir, 'task_%s.log' % task_id))
+    if not log_path.startswith(log_dir + os.sep):
+        raise Http404
     try:
-        f = open(os.path.join(settings.TASK_LOG_DIR, 'task_%s.log' % task_id), 'rb')
+        f = open(log_path, 'rb')
     except FileNotFoundError:
         raise Http404
     try:
@@ -1997,4 +2001,3 @@ class RecipeDependenciesView(FormView):
         context['excludelayers_text'] = ', '.join([layerlist[int(i)] for i in exclude_layer_ids])
 
         return context
-
